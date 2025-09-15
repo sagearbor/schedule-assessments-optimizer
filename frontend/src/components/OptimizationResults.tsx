@@ -13,6 +13,7 @@ import ScheduleTable from './ScheduleTable';
 import BurdenChart from './BurdenChart';
 import SuggestionsList from './SuggestionsList';
 import OptimizationComparison from './OptimizationComparison';
+import MCPConsensusDetails from './MCPConsensusDetails';
 
 const OptimizationResults: React.FC = () => {
   const navigate = useNavigate();
@@ -62,7 +63,7 @@ const OptimizationResults: React.FC = () => {
         {/* Success Banner */}
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
           <div className="flex items-start">
-            <CheckCircleIcon className="h-6 w-6 text-green-600 mt-0.5 mr-3 flex-shrink-0" />
+            <CheckCircleIcon className="h-6 w-6 text-green-500 mt-0.5 mr-3 flex-shrink-0" />
             <div className="flex-1">
               <h3 className="text-lg font-semibold text-green-900 mb-1">
                 Optimization Complete
@@ -74,12 +75,17 @@ const OptimizationResults: React.FC = () => {
           </div>
         </div>
 
+        {/* MCP Consensus Details */}
+        <div className="mb-6">
+          <MCPConsensusDetails consensusInfo={(result as any).mcp_consensus_info} />
+        </div>
+
         {/* Key Metrics */}
         <div className="grid md:grid-cols-4 gap-4 mb-6">
           <div className="bg-white rounded-lg shadow-md p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-gray-600">Patient Burden</span>
-              <ArrowDownIcon className="h-4 w-4 text-green-600" />
+              <ArrowDownIcon className="h-4 w-4 text-green-500" />
             </div>
             <div className="text-2xl font-bold text-gray-900">
               {patientBurdenReduction}%
@@ -92,7 +98,7 @@ const OptimizationResults: React.FC = () => {
           <div className="bg-white rounded-lg shadow-md p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-gray-600">Site Burden</span>
-              <ArrowDownIcon className="h-4 w-4 text-green-600" />
+              <ArrowDownIcon className="h-4 w-4 text-green-500" />
             </div>
             <div className="text-2xl font-bold text-gray-900">
               {siteBurdenReduction}%
@@ -204,7 +210,7 @@ const OptimizationResults: React.FC = () => {
           <div className="bg-white rounded-lg shadow-md p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Optimized Schedule
-              <span className="ml-2 text-sm font-normal text-green-600">
+              <span className="ml-2 text-sm font-normal text-green-500">
                 (Changes highlighted)
               </span>
             </h3>

@@ -169,6 +169,14 @@ async def optimize_schedule(
         # Call real MCP server for additional analysis
         mcp_complexity_data = None
         mcp_compliance_data = None
+        mcp_consensus_info = {
+            "method": "not_available",
+            "confidence": 0,
+            "details": "MCP server not contacted",
+            "pattern_confidence": 0,
+            "llm_confidence": 0,
+            "arbitration_used": False
+        }
 
         try:
             async with httpx.AsyncClient() as client:
@@ -189,6 +197,14 @@ async def optimize_schedule(
                 if complexity_response.status_code == 200:
                     mcp_complexity_data = complexity_response.json()
                     print(f"MCP Complexity score: {mcp_complexity_data.get('complexity_score', 0)}")
+
+                    # Extract consensus information if available
+                    if 'consensus_info' in mcp_complexity_data:
+                        mcp_consensus_info.update(mcp_complexity_data['consensus_info'])
+                    elif 'confidence' in mcp_complexity_data:
+                        mcp_consensus_info['confidence'] = mcp_complexity_data['confidence']
+                        mcp_consensus_info['method'] = 'mcp_analysis'
+                        mcp_consensus_info['details'] = 'MCP server analysis completed'
 
                 # Call Compliance Knowledge Base tool
                 compliance_response = await client.post(
@@ -277,7 +293,8 @@ async def optimize_schedule(
             suggestions=suggestions,
             warnings=warnings,
             improvement_percentage=improvement_percentage,
-            summary=summary
+            summary=summary,
+            mcp_consensus_info=mcp_consensus_info
         )
         
         return result

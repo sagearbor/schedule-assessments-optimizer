@@ -477,7 +477,7 @@ class RulesEngine:
 
                         if all_remote:
                             visit.name = f"{visit.name} (Remote)"
-                            visit.is_remote_possible = True
+                            # Note: is_remote_possible field not in Visit model
                         else:
                             visit.name = f"{visit.name} (Partial Remote)"
                             for assessment in visit.assessments:

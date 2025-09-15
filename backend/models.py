@@ -154,6 +154,7 @@ class OptimizationResult(BaseModel):
     warnings: List[ComplianceWarning]
     improvement_percentage: float
     summary: str
+    mcp_consensus_info: Optional[Dict[str, Any]] = None
 
 
 class ScheduleComparison(BaseModel):
