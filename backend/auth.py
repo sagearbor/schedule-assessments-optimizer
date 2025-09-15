@@ -159,16 +159,57 @@ class AuthService:
         return current_user
 
 
+from fastapi import Header
+
 # Optional user dependency - returns None if not authenticated
 def get_optional_current_user(
-    token: Optional[str] = Depends(oauth2_scheme), 
+    authorization: Optional[str] = Header(None),
     db: Session = Depends(get_db)
 ) -> Optional[User]:
     """Get the current user if authenticated, otherwise return None."""
-    if not token:
+    if not authorization:
         return None
-    
+
+    # Extract token from "Bearer <token>" format
     try:
-        return AuthService.get_current_user(token, db)
+        scheme, token = authorization.split()
+        if scheme.lower() != "bearer":
+            return None
+    except ValueError:
+        return None
+
+    try:
+        # Decode and verify the token directly
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            return None
+
+        # For demo user, return a mock user object
+        if email == "demo@example.com":
+            return User(
+                id="demo-user",
+                email=email,
+                full_name="Demo User",
+                organization="Demo Org",
+                role="user",
+                created_at=datetime.utcnow(),
+                is_active=True
+            )
+
+        # Get user from database
+        user = db.query(DBUser).filter(DBUser.email == email).first()
+        if user is None:
+            return None
+
+        return User(
+            id=user.id,
+            email=user.email,
+            full_name=user.full_name,
+            organization=user.organization,
+            role=user.role,
+            created_at=user.created_at,
+            is_active=user.is_active
+        )
     except:
         return None

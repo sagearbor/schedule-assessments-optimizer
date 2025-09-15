@@ -21,7 +21,7 @@ from auth import AuthService, get_optional_current_user
 from burden_calculator import BurdenCalculator
 from rules_engine import RulesEngine
 from sample_data import SampleDataGenerator
-from mcp_integration import get_mcp_integration
+# from mcp_integration import get_mcp_integration  # Commented out - module not available
 
 app = FastAPI(
     title="Schedule of Assessments Optimizer",
@@ -29,8 +29,7 @@ app = FastAPI(
     description="Optimize clinical trial schedules to reduce patient and site burden"
 )
 
-# MCP or REST mode
-USE_MCP = os.getenv("USE_MCP", "true").lower() == "true"
+# MCP server URL
 MCP_SERVER_URL = os.getenv("MCP_SERVER_URL", "http://localhost:8210")
 
 # CORS middleware
@@ -52,11 +51,7 @@ burden_calculator = BurdenCalculator()
 rules_engine = RulesEngine()
 sample_generator = SampleDataGenerator()
 auth_service = AuthService()
-mcp_integration = get_mcp_integration() if USE_MCP else None
-
-# MCP Service URLs
-MCP_COMPLEXITY_URL = "http://mcp_complexity:8001"
-MCP_COMPLIANCE_URL = "http://mcp_compliance:8002"
+# mcp_integration = get_mcp_integration() if USE_MCP else None  # Commented out - module not available
 
 
 @app.get("/")
@@ -170,77 +165,46 @@ async def optimize_schedule(
         original_patient_burden = burden_calculator.calculate_patient_burden(schedule)
         original_site_burden = burden_calculator.calculate_site_burden(schedule)
         
-        # Call MCP services or REST fallback for additional analysis
+        # Call real MCP server for additional analysis
         mcp_complexity_data = None
         mcp_compliance_data = None
 
-        if USE_MCP and mcp_integration:
-            # Use MCP protocol servers
-            try:
-                # Call Protocol Complexity Analyzer via MCP
-                complexity_params = {
-                    "protocol_name": schedule.protocol_name,
-                    "phase": schedule.phase,
-                    "num_visits": len(schedule.visits),
-                    "num_procedures": sum(len(v.assessments) for v in schedule.visits),
-                    "duration_days": schedule.total_duration_days,
-                    "num_sites": 10  # Default estimate
-                }
-                mcp_complexity_data = await mcp_integration.analyze_complexity(complexity_params)
-                if mcp_complexity_data:
+        try:
+            async with httpx.AsyncClient() as client:
+                # Call Study Complexity Calculator tool
+                complexity_response = await client.post(
+                    f"{MCP_SERVER_URL}/run_tool/study_complexity_calculator",
+                    json={
+                        "protocol_name": schedule.protocol_name,
+                        "phase": schedule.phase,
+                        "therapeutic_area": schedule.therapeutic_area,
+                        "duration_days": schedule.total_duration_days,
+                        "num_visits": len(schedule.visits),
+                        "num_procedures": sum(len(v.assessments) for v in schedule.visits),
+                        "num_sites": 10  # Default estimate
+                    },
+                    timeout=30.0
+                )
+                if complexity_response.status_code == 200:
+                    mcp_complexity_data = complexity_response.json()
                     print(f"MCP Complexity score: {mcp_complexity_data.get('complexity_score', 0)}")
 
-                # Call Compliance Knowledge Base via MCP
-                compliance_params = {
-                    "schedule_data": schedule.dict(),
-                    "region": "US",
-                    "include_warnings": True
-                }
-                mcp_compliance_data = await mcp_integration.check_compliance(compliance_params)
-                if mcp_compliance_data:
-                    print(f"MCP Compliance score: {mcp_compliance_data.get('compliance_score', 0)}")
-                    print(f"MCP Compliance status: {mcp_compliance_data.get('status', 'Unknown')}")
-            except Exception as e:
-                print(f"MCP service call failed: {e}")
-                # Continue without MCP data
-        else:
-            # Use REST API fallback
-            try:
-                async with httpx.AsyncClient() as client:
-                    # Call Study Complexity Calculator tool
-                    complexity_response = await client.post(
-                        f"{MCP_SERVER_URL}/run_tool/study_complexity_calculator",
-                        json={
-                            "protocol_name": schedule.protocol_name,
-                            "phase": schedule.phase,
-                            "therapeutic_area": schedule.therapeutic_area,
-                            "duration_days": schedule.total_duration_days,
-                            "num_visits": len(schedule.visits),
-                            "num_procedures": sum(len(v.assessments) for v in schedule.visits),
-                            "num_sites": 10  # Default estimate
-                        },
-                        timeout=30.0
-                    )
-                    if complexity_response.status_code == 200:
-                        mcp_complexity_data = complexity_response.json()
-                        print(f"REST Complexity score: {mcp_complexity_data.get('complexity_score', 0)}")
-
-                    # Call Compliance Knowledge Base tool
-                    compliance_response = await client.post(
-                        f"{MCP_SERVER_URL}/run_tool/compliance_knowledge_base",
-                        json={
-                            "schedule_data": schedule.dict(),
-                            "schema_type": "generic",
-                            "include_warnings": True
-                        },
-                        timeout=30.0
-                    )
-                    if compliance_response.status_code == 200:
-                        mcp_compliance_data = compliance_response.json()
-                        print(f"REST Compliance findings: {len(mcp_compliance_data.get('findings', []))} issues found")
-            except Exception as e:
-                print(f"REST API call failed: {e}")
-                # Continue without external data
+                # Call Compliance Knowledge Base tool
+                compliance_response = await client.post(
+                    f"{MCP_SERVER_URL}/run_tool/compliance_knowledge_base",
+                    json={
+                        "schedule_data": schedule.dict(),
+                        "schema_type": "generic",
+                        "include_warnings": True
+                    },
+                    timeout=30.0
+                )
+                if compliance_response.status_code == 200:
+                    mcp_compliance_data = compliance_response.json()
+                    print(f"MCP Compliance findings: {len(mcp_compliance_data.get('findings', []))} issues found")
+        except Exception as e:
+            print(f"MCP server call failed: {e}")
+            # Continue without MCP data
         
         # Apply optimization rules
         optimized_schedule, suggestions, warnings = rules_engine.optimize_schedule(
@@ -351,34 +315,72 @@ def get_complex_demo_data():
 @app.post("/upload-schedule", response_model=Schedule)
 async def upload_schedule(
     file: UploadFile = File(...),
+    db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_optional_current_user)
 ):
     """
     Upload a schedule from CSV or JSON file.
     """
+    print(f"Upload request received - filename: {file.filename}")
+    print(f"File content type: {file.content_type}")
+    print(f"User authenticated: {current_user is not None}")
+
+    if not file.filename:
+        print("Error: No filename provided")
+        raise HTTPException(
+            status_code=400,
+            detail="No file provided"
+        )
+
     if not file.filename.endswith(('.csv', '.json')):
+        print(f"Error: Invalid file format - {file.filename}")
         raise HTTPException(
             status_code=400,
             detail="File must be CSV or JSON format"
         )
     
     content = await file.read()
-    
+    print(f"File size: {len(content)} bytes")
+
     try:
         if file.filename.endswith('.json'):
+            print("Parsing JSON file...")
             data = json.loads(content)
+            print(f"JSON data keys: {list(data.keys())}")
+
+            # Ensure visits is a list
+            if 'visits' in data and data['visits']:
+                print(f"Number of visits in JSON: {len(data['visits'])}")
+                # Convert visit data to Visit objects if needed
+                from models import Visit, Assessment
+                visits = []
+                for v in data['visits']:
+                    assessments = []
+                    for a in v.get('assessments', []):
+                        assessments.append(Assessment(**a))
+                    visit = Visit(
+                        name=v['name'],
+                        day=v['day'],
+                        visit_type=v.get('visit_type', 'regular'),
+                        assessments=assessments
+                    )
+                    visits.append(visit)
+                data['visits'] = visits
+
             schedule = Schedule(**data)
+            print(f"Successfully created schedule: {schedule.protocol_name}")
         else:
             # Parse CSV
+            print("Parsing CSV file...")
             csv_data = csv.DictReader(io.StringIO(content.decode()))
             visits = []
-            
+
             # This is a simplified CSV parser - in production would be more robust
             for row in csv_data:
                 # Parse visit and assessment data from CSV
                 # Implementation would depend on CSV format specification
                 pass
-            
+
             schedule = Schedule(
                 protocol_name="Uploaded Schedule",
                 protocol_version="1.0",
@@ -387,10 +389,19 @@ async def upload_schedule(
                 visits=visits,
                 total_duration_days=180
             )
-        
+
         return schedule
-        
+
+    except json.JSONDecodeError as e:
+        print(f"JSON decode error: {str(e)}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid JSON format: {str(e)}"
+        )
     except Exception as e:
+        print(f"Error parsing file: {str(e)}")
+        import traceback
+        print(f"Traceback: {traceback.format_exc()}")
         raise HTTPException(
             status_code=400,
             detail=f"Error parsing file: {str(e)}"

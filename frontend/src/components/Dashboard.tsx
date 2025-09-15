@@ -45,20 +45,25 @@ const Dashboard: React.FC = () => {
   };
 
   const downloadDemoData = async (type: string) => {
+    console.log(`Starting download for ${type} demo data`);
     setIsLoading(true);
     try {
       let schedule: Schedule;
-      
+
       if (type === 'complex') {
+        console.log('Fetching complex demo data...');
         schedule = await scheduleService.getComplexDemoData();
       } else {
         const therapeuticArea = type;
-        schedule = await scheduleService.getDemoData({ 
+        console.log(`Fetching ${therapeuticArea} demo data...`);
+        schedule = await scheduleService.getDemoData({
           therapeutic_area: therapeuticArea,
           phase: therapeuticArea === 'cardiology' ? '3' : '2'
         });
       }
-      
+
+      console.log('Data received, creating download...');
+
       // Create and download JSON file
       const dataStr = JSON.stringify(schedule, null, 2);
       const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -66,15 +71,24 @@ const Dashboard: React.FC = () => {
       const link = document.createElement('a');
       link.href = url;
       link.download = `demo-${type}-schedule.json`;
+      link.style.display = 'none'; // Hide the link
       document.body.appendChild(link);
+
+      // Force download
       link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-      
+
+      // Cleanup
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 100);
+
       toast.success(`Downloaded ${type} demo data`);
+      console.log(`Successfully downloaded ${type} demo data`);
     } catch (error: any) {
       console.error('Demo data download error:', error);
-      toast.error(error.response?.data?.detail || 'Failed to download demo data');
+      console.error('Error details:', error.response);
+      toast.error(error.response?.data?.detail || error.message || 'Failed to download demo data');
     } finally {
       setIsLoading(false);
     }

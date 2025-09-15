@@ -1,0 +1,366 @@
+{
+  "protocol_name": "Sample Oncology Phase 2 Study",
+  "protocol_version": "1.0",
+  "therapeutic_area": "oncology",
+  "phase": "2",
+  "total_duration_days": 180,
+  "visits": [
+    {
+      "name": "Screening",
+      "day": -14,
+      "visit_type": "screening",
+      "assessments": [
+        {
+          "name": "Informed Consent",
+          "type": "questionnaire",
+          "duration_minutes": 30,
+          "invasiveness": "non_invasive",
+          "patient_burden_score": 2
+        },
+        {
+          "name": "Medical History",
+          "type": "questionnaire",
+          "duration_minutes": 20,
+          "invasiveness": "non_invasive",
+          "patient_burden_score": 1
+        },
+        {
+          "name": "Vital Signs",
+          "type": "vital_signs",
+          "duration_minutes": 10,
+          "invasiveness": "non_invasive",
+          "patient_burden_score": 1
+        },
+        {
+          "name": "Blood Draw",
+          "type": "blood_draw",
+          "duration_minutes": 15,
+          "invasiveness": "invasive",
+          "patient_burden_score": 3
+        },
+        {
+          "name": "ECG",
+          "type": "ecg",
+          "duration_minutes": 15,
+          "invasiveness": "non_invasive",
+          "patient_burden_score": 2
+        },
+        {
+          "name": "CT Scan",
+          "type": "imaging",
+          "duration_minutes": 45,
+          "invasiveness": "minimally_invasive",
+          "patient_burden_score": 4
+        }
+      ]
+    },
+    {
+      "name": "Baseline",
+      "day": 0,
+      "visit_type": "baseline",
+      "assessments": [
+        {
+          "name": "Vital Signs",
+          "type": "vital_signs",
+          "duration_minutes": 10,
+          "invasiveness": "non_invasive",
+          "patient_burden_score": 1
+        },
+        {
+          "name": "Blood Draw",
+          "type": "blood_draw",
+          "duration_minutes": 15,
+          "invasiveness": "invasive",
+          "patient_burden_score": 3
+        },
+        {
+          "name": "Physical Exam",
+          "type": "physical_exam",
+          "duration_minutes": 30,
+          "invasiveness": "non_invasive",
+          "patient_burden_score": 2
+        },
+        {
+          "name": "Quality of Life Survey",
+          "type": "questionnaire",
+          "duration_minutes": 20,
+          "invasiveness": "non_invasive",
+          "patient_burden_score": 1
+        }
+      ]
+    },
+    {
+      "name": "Week 1",
+      "day": 7,
+      "visit_type": "treatment",
+      "assessments": [
+        {
+          "name": "Vital Signs",
+          "type": "vital_signs",
+          "duration_minutes": 10,
+          "invasiveness": "non_invasive",
+          "patient_burden_score": 1
+        },
+        {
+          "name": "Blood Draw",
+          "type": "blood_draw",
+          "duration_minutes": 15,
+          "invasiveness": "invasive",
+          "patient_burden_score": 3
+        },
+        {
+          "name": "Adverse Event Review",
+          "type": "questionnaire",
+          "duration_minutes": 15,
+          "invasiveness": "non_invasive",
+          "patient_burden_score": 1
+        }
+      ]
+    },
+    {
+      "name": "Week 2",
+      "day": 14,
+      "visit_type": "treatment",
+      "assessments": [
+        {
+          "name": "Vital Signs",
+          "type": "vital_signs",
+          "duration_minutes": 10,
+          "invasiveness": "non_invasive",
+          "patient_burden_score": 1
+        },
+        {
+          "name": "Blood Draw",
+          "type": "blood_draw",
+          "duration_minutes": 15,
+          "invasiveness": "invasive",
+          "patient_burden_score": 3
+        },
+        {
+          "name": "PK Sample",
+          "type": "pk_sample",
+          "duration_minutes": 10,
+          "invasiveness": "invasive",
+          "patient_burden_score": 3
+        },
+        {
+          "name": "ECG",
+          "type": "ecg",
+          "duration_minutes": 15,
+          "invasiveness": "non_invasive",
+          "patient_burden_score": 2
+        }
+      ]
+    },
+    {
+      "name": "Week 4",
+      "day": 28,
+      "visit_type": "treatment",
+      "assessments": [
+        {
+          "name": "Vital Signs",
+          "type": "vital_signs",
+          "duration_minutes": 10,
+          "invasiveness": "non_invasive",
+          "patient_burden_score": 1
+        },
+        {
+          "name": "Blood Draw",
+          "type": "blood_draw",
+          "duration_minutes": 15,
+          "invasiveness": "invasive",
+          "patient_burden_score": 3
+        },
+        {
+          "name": "Physical Exam",
+          "type": "physical_exam",
+          "duration_minutes": 30,
+          "invasiveness": "non_invasive",
+          "patient_burden_score": 2
+        },
+        {
+          "name": "CT Scan",
+          "type": "imaging",
+          "duration_minutes": 45,
+          "invasiveness": "minimally_invasive",
+          "patient_burden_score": 4
+        },
+        {
+          "name": "Quality of Life Survey",
+          "type": "questionnaire",
+          "duration_minutes": 20,
+          "invasiveness": "non_invasive",
+          "patient_burden_score": 1
+        }
+      ]
+    },
+    {
+      "name": "Week 6",
+      "day": 42,
+      "visit_type": "treatment",
+      "assessments": [
+        {
+          "name": "Vital Signs",
+          "type": "vital_signs",
+          "duration_minutes": 10,
+          "invasiveness": "non_invasive",
+          "patient_burden_score": 1
+        },
+        {
+          "name": "Blood Draw",
+          "type": "blood_draw",
+          "duration_minutes": 15,
+          "invasiveness": "invasive",
+          "patient_burden_score": 3
+        },
+        {
+          "name": "Adverse Event Review",
+          "type": "questionnaire",
+          "duration_minutes": 15,
+          "invasiveness": "non_invasive",
+          "patient_burden_score": 1
+        }
+      ]
+    },
+    {
+      "name": "Week 8",
+      "day": 56,
+      "visit_type": "treatment",
+      "assessments": [
+        {
+          "name": "Vital Signs",
+          "type": "vital_signs",
+          "duration_minutes": 10,
+          "invasiveness": "non_invasive",
+          "patient_burden_score": 1
+        },
+        {
+          "name": "Blood Draw",
+          "type": "blood_draw",
+          "duration_minutes": 15,
+          "invasiveness": "invasive",
+          "patient_burden_score": 3
+        },
+        {
+          "name": "Physical Exam",
+          "type": "physical_exam",
+          "duration_minutes": 30,
+          "invasiveness": "non_invasive",
+          "patient_burden_score": 2
+        },
+        {
+          "name": "CT Scan",
+          "type": "imaging",
+          "duration_minutes": 45,
+          "invasiveness": "minimally_invasive",
+          "patient_burden_score": 4
+        },
+        {
+          "name": "ECG",
+          "type": "ecg",
+          "duration_minutes": 15,
+          "invasiveness": "non_invasive",
+          "patient_burden_score": 2
+        }
+      ]
+    },
+    {
+      "name": "Week 12",
+      "day": 84,
+      "visit_type": "treatment",
+      "assessments": [
+        {
+          "name": "Vital Signs",
+          "type": "vital_signs",
+          "duration_minutes": 10,
+          "invasiveness": "non_invasive",
+          "patient_burden_score": 1
+        },
+        {
+          "name": "Blood Draw",
+          "type": "blood_draw",
+          "duration_minutes": 15,
+          "invasiveness": "invasive",
+          "patient_burden_score": 3
+        },
+        {
+          "name": "Physical Exam",
+          "type": "physical_exam",
+          "duration_minutes": 30,
+          "invasiveness": "non_invasive",
+          "patient_burden_score": 2
+        },
+        {
+          "name": "CT Scan",
+          "type": "imaging",
+          "duration_minutes": 45,
+          "invasiveness": "minimally_invasive",
+          "patient_burden_score": 4
+        },
+        {
+          "name": "Quality of Life Survey",
+          "type": "questionnaire",
+          "duration_minutes": 20,
+          "invasiveness": "non_invasive",
+          "patient_burden_score": 1
+        },
+        {
+          "name": "Tumor Biopsy",
+          "type": "biopsy",
+          "duration_minutes": 60,
+          "invasiveness": "invasive",
+          "patient_burden_score": 5
+        }
+      ]
+    },
+    {
+      "name": "End of Study",
+      "day": 180,
+      "visit_type": "end_of_study",
+      "assessments": [
+        {
+          "name": "Vital Signs",
+          "type": "vital_signs",
+          "duration_minutes": 10,
+          "invasiveness": "non_invasive",
+          "patient_burden_score": 1
+        },
+        {
+          "name": "Blood Draw",
+          "type": "blood_draw",
+          "duration_minutes": 15,
+          "invasiveness": "invasive",
+          "patient_burden_score": 3
+        },
+        {
+          "name": "Physical Exam",
+          "type": "physical_exam",
+          "duration_minutes": 30,
+          "invasiveness": "non_invasive",
+          "patient_burden_score": 2
+        },
+        {
+          "name": "CT Scan",
+          "type": "imaging",
+          "duration_minutes": 45,
+          "invasiveness": "minimally_invasive",
+          "patient_burden_score": 4
+        },
+        {
+          "name": "Quality of Life Survey",
+          "type": "questionnaire",
+          "duration_minutes": 20,
+          "invasiveness": "non_invasive",
+          "patient_burden_score": 1
+        },
+        {
+          "name": "End of Study Questionnaire",
+          "type": "questionnaire",
+          "duration_minutes": 30,
+          "invasiveness": "non_invasive",
+          "patient_burden_score": 2
+        }
+      ]
+    }
+  ]
+}

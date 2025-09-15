@@ -1,0 +1,1 @@
+{"protocol_name":"Test Protocol","protocol_version":"1.0","therapeutic_area":"oncology","phase":"2","total_duration_days":180,"visits":[{"name":"Screening","day":-7,"visit_type":"screening","assessments":[{"name":"Informed Consent","type":"questionnaire","duration_minutes":30,"invasiveness":"non_invasive","patient_burden_score":2}]}]}
