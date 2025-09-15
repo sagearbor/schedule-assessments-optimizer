@@ -1,0 +1,38 @@
+services:
+  # Backend API
+  backend:
+    build: ./backend
+    container_name: soa-backend
+    ports:
+      - "8040:8080"
+    environment:
+      - DATABASE_URL=sqlite:////app/data/soa_optimizer.db
+      - SECRET_KEY=your-secret-key-change-in-production
+      - MCP_SERVER_URL=http://host.docker.internal:8210
+    volumes:
+      - ./backend:/app
+      - backend-data:/app/data
+    networks:
+      - soa-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Frontend
+  frontend:
+    build: ./frontend
+    container_name: soa-frontend
+    ports:
+      - "3040:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8040
+    networks:
+      - soa-network
+    depends_on:
+      - backend
+
+networks:
+  soa-network:
+    driver: bridge
+
+volumes:
+  backend-data:
