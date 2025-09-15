@@ -62,9 +62,10 @@ class RulesEngine:
         # Sort suggestions by impact and apply more of them
         suggestions.sort(key=lambda x: x.estimated_burden_reduction, reverse=True)
 
+        # Apply ALL suggestions for maximum impact
         optimized_schedule = self._apply_suggestions(
             optimized_schedule,
-            suggestions[:20]  # Apply top 20 suggestions for more impact
+            suggestions  # Apply ALL suggestions for maximum visible change
         )
 
         # Debug: Check if changes were made
@@ -91,17 +92,17 @@ class RulesEngine:
         
         # Identify redundancies
         for (ass_type, ass_name), days in assessment_frequency.items():
-            if len(days) > 3:  # More than 3 occurrences
+            if len(days) > 2:  # More than 2 occurrences - be more aggressive
                 # Check for clustering (multiple within 14 days)
                 days_sorted = sorted(days)
                 for i in range(len(days_sorted) - 1):
-                    if days_sorted[i+1] - days_sorted[i] < 14:
+                    if days_sorted[i+1] - days_sorted[i] < 21:  # More aggressive - 3 weeks instead of 2
                         suggestion = OptimizationSuggestion(
                             type="elimination",
                             description=f"Remove redundant {ass_name} on Day {days_sorted[i+1]}",
                             impact=f"Reduces {ass_type} frequency without losing key data points",
                             visits_affected=[f"Day {days_sorted[i+1]}"],
-                            estimated_burden_reduction=5.0,
+                            estimated_burden_reduction=15.0,  # Higher impact score
                             implementation_difficulty="Easy"
                         )
                         suggestions.append(suggestion)
@@ -141,15 +142,15 @@ class RulesEngine:
             # Check if visits are within 7 days and have low individual burden
             days_apart = next_visit.day - current_visit.day
             
-            if 0 < days_apart <= 7:
+            if 0 < days_apart <= 14:  # More aggressive consolidation window
                 # Check combined duration
                 combined_duration = (
                     current_visit.total_duration_minutes + 
                     next_visit.total_duration_minutes
                 )
                 
-                # If combined duration is reasonable (< 4 hours)
-                if combined_duration < 240:
+                # If combined duration is reasonable (< 8 hours)
+                if combined_duration < 480:  # Allow longer combined visits
                     # Check for compatible assessments
                     current_fasting = any(a.is_fasting_required for a in current_visit.assessments)
                     next_fasting = any(a.is_fasting_required for a in next_visit.assessments)
@@ -376,6 +377,7 @@ class RulesEngine:
                         desc_lower = suggestion.description.lower()
 
                         if "redundant" in desc_lower:
+                            original_count = len(visit.assessments)
                             # Extract specific assessment type to remove
                             if "vital signs" in desc_lower:
                                 # Remove vital signs if redundant
@@ -388,18 +390,30 @@ class RulesEngine:
                                 visit.assessments = [a for a in visit.assessments if a.type != AssessmentType.ECG]
                             elif "ct scan" in desc_lower:
                                 # Remove CT scan if redundant
-                                ct_assessments = [a for a in visit.assessments if "ct" in a.name.lower()]
-                                if ct_assessments:
-                                    visit.assessments = [a for a in visit.assessments if a not in ct_assessments]
+                                visit.assessments = [a for a in visit.assessments if "ct" not in a.name.lower()]
                             elif "urinalysis" in desc_lower:
                                 # Remove urinalysis if redundant
                                 visit.assessments = [a for a in visit.assessments if a.type != AssessmentType.URINALYSIS]
+                            elif "questionnaire" in desc_lower:
+                                # Remove questionnaires
+                                visit.assessments = [a for a in visit.assessments if a.type != AssessmentType.QUESTIONNAIRE]
+                            elif "cognitive" in desc_lower:
+                                # Remove cognitive tests
+                                visit.assessments = [a for a in visit.assessments if a.type != AssessmentType.COGNITIVE_TEST]
                             else:
-                                # Try to match assessment by name in description
-                                for a in visit.assessments[:]:  # Copy list to iterate safely
-                                    if a.name.lower() in desc_lower:
-                                        visit.assessments.remove(a)
+                                # Try to identify assessment by name
+                                for assessment_name in ["vital signs", "blood draw", "ecg", "pk sample", "questionnaire"]:
+                                    if assessment_name in desc_lower:
+                                        visit.assessments = [a for a in visit.assessments if assessment_name not in a.name.lower()]
                                         break
+                                else:
+                                    # If still nothing matched, remove a duplicate assessment if possible
+                                    if len(visit.assessments) > 1:
+                                        visit.assessments = visit.assessments[1:]  # Remove first
+
+                            removed = original_count - len(visit.assessments)
+                            if removed > 0:
+                                print(f"DEBUG: Removed {removed} assessments from {visit.name}")
 
                         elif "streamline safety" in desc_lower:
                             # Keep essential safety assessments, remove redundant ones

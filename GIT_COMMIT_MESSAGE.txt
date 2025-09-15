@@ -1,0 +1,17 @@
+Integrate real MCP server and update documentation
+
+- Replace mock MCP services with real MCP server at port 8210
+- Update About page to show real MCP integration with external dependency warning
+- Add aggressive optimization: 32+ suggestions, 21-day windows, complete elimination
+- Create test_mcp_integration.py for verifying MCP connectivity
+- Create test_mcp_frontend.md guide for frontend testing
+- Update flow diagrams to show LLM consensus and arbitration process
+- Fix burden calculator for more sensitive scoring (30hr/15visit thresholds)
+- Update README and CLAUDE.md with clear startup sequence
+- Emphasize MCP server is external dependency that must start first
+- Add visual bar chart comparison showing assessment counts per visit
+- Document actual optimization results: Baseline 4→0, Day3+Day5 consolidation
+
+🤖 Generated with Claude Code (https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>

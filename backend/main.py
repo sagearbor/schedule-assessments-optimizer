@@ -13,9 +13,10 @@ from datetime import datetime, timedelta
 
 from database import init_db, get_db, DBSchedule, DBOptimizationHistory, DBUser
 from models import (
-    Schedule, OptimizationResult, DemoDataRequest, 
-    User, UserCreate, UserLogin, Token, 
-    BurdenScore, SiteBurdenScore, ScheduleComparison
+    Schedule, OptimizationResult, DemoDataRequest,
+    User, UserCreate, UserLogin, Token,
+    BurdenScore, SiteBurdenScore, ScheduleComparison,
+    AssessmentType, Assessment, Visit
 )
 from auth import AuthService, get_optional_current_user
 from burden_calculator import BurdenCalculator

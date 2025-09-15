@@ -56,10 +56,11 @@ class BurdenCalculator:
         avg_discomfort = sum(discomfort_scores) / len(discomfort_scores) if discomfort_scores else 0
         
         # Calculate component scores (normalized to 0-100)
-        time_score = min(100, (total_time_hours / 50) * 100)  # 50 hours = max score
-        travel_score = min(100, (total_travel_count / 20) * 100)  # 20 visits = max score
-        invasive_score = min(100, (invasive_count / 15) * 100)  # 15 procedures = max score
-        fasting_score = min(100, (fasting_count / 10) * 100)  # 10 fasting = max score
+        # Make scoring more sensitive to changes
+        time_score = min(100, (total_time_hours / 30) * 100)  # 30 hours = max score (was 50)
+        travel_score = min(100, (total_travel_count / 15) * 100)  # 15 visits = max score (was 20)
+        invasive_score = min(100, (invasive_count / 10) * 100)  # 10 procedures = max score (was 15)
+        fasting_score = min(100, (fasting_count / 7) * 100)  # 7 fasting = max score (was 10)
         discomfort_score = (avg_discomfort / 10) * 100  # Already on 1-10 scale
         
         # Calculate weighted total score

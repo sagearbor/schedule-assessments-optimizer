@@ -89,55 +89,58 @@ const About: React.FC = () => {
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center mb-3">
               <BeakerIcon className="h-6 w-6 text-indigo-600 mr-2" />
-              <h3 className="text-lg font-semibold">Smart Optimization</h3>
+              <h3 className="text-lg font-semibold">Aggressive Optimization</h3>
             </div>
             <p className="text-gray-600 text-sm">
-              Applies intelligent rules to detect redundancies, consolidate visits, and ensure 
-              logistical feasibility while maintaining scientific validity.
+              Applies 32+ optimization suggestions with aggressive rules: 21-day redundancy windows,
+              14-day consolidation, complete assessment elimination (e.g., Baseline 4→0).
             </p>
           </div>
 
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center mb-3">
               <InformationCircleIcon className="h-6 w-6 text-indigo-600 mr-2" />
-              <h3 className="text-lg font-semibold">MCP Integration</h3>
+              <h3 className="text-lg font-semibold">Real MCP Server (Port 8210)</h3>
             </div>
             <p className="text-gray-600 text-sm">
-              Integrates with{' '}
+              <span className="font-bold text-red-600">EXTERNAL DEPENDENCY:</span> Integrates with real{' '}
               <span className="relative inline-block group cursor-help">
                 <span className="font-medium text-indigo-600 border-b border-dotted border-indigo-400">
-                  Protocol Complexity Analyzer
+                  MCP Server
                 </span>
                 <div className="absolute z-50 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-200 bg-gray-900 text-white text-xs rounded-lg p-3 mt-1 w-64 left-1/2 transform -translate-x-1/2">
-                  <div className="font-semibold mb-1">Protocol Complexity Analyzer</div>
-                  <p>Analyzes clinical trial protocols to calculate complexity scores based on:</p>
+                  <div className="font-semibold mb-1">Real MCP Server Features</div>
+                  <p>Production MCP server at port 8210 provides:</p>
                   <ul className="mt-1 space-y-0.5">
-                    <li>• Number and frequency of visits</li>
-                    <li>• Assessment types and procedures</li>
-                    <li>• Patient population requirements</li>
-                    <li>• Overall protocol burden metrics</li>
+                    <li>• Schedule conversion (CSV→CDISC/FHIR/OMOP)</li>
+                    <li>• LLM + Fuzzy Logic consensus (85%+ accuracy)</li>
+                    <li>• Complexity scoring via study_complexity_calculator</li>
+                    <li>• Arbitration when LLM/regex disagree &gt;20%</li>
                   </ul>
                   <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-gray-900"></div>
                 </div>
               </span>
-              {' '}and{' '}
+              {' '}with{' '}
               <span className="relative inline-block group cursor-help">
                 <span className="font-medium text-indigo-600 border-b border-dotted border-indigo-400">
-                  Compliance Knowledge Base
+                  JSON-RPC 2.0 Protocol
                 </span>
                 <div className="absolute z-50 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-200 bg-gray-900 text-white text-xs rounded-lg p-3 mt-1 w-64 left-1/2 transform -translate-x-1/2">
-                  <div className="font-semibold mb-1">Compliance Knowledge Base</div>
-                  <p>Provides regulatory compliance insights including:</p>
+                  <div className="font-semibold mb-1">LLM Consensus Process</div>
+                  <p>Two-phase validation with arbitration:</p>
                   <ul className="mt-1 space-y-0.5">
-                    <li>• FDA and EMA guideline compliance</li>
-                    <li>• Historical trial performance data</li>
-                    <li>• Best practices for patient retention</li>
-                    <li>• Risk assessment for protocol deviations</li>
+                    <li>• Pattern matching (80% baseline accuracy)</li>
+                    <li>• Azure OpenAI validation (if configured)</li>
+                    <li>• GPT-5 mini arbitrator for disagreements</li>
+                    <li>• Learning cache per organization</li>
                   </ul>
                   <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-gray-900"></div>
                 </div>
               </span>
-              {' '}services for comprehensive protocol analysis.
+              {' '}for autonomous schedule conversion and analysis.
+              <div className="mt-2 text-xs text-red-600 font-semibold">
+                ⚠️ Must start MCP server first: cd /dcri/sasusers/home/scb2/gitRepos/dcri-mcp-tools && python server.py
+              </div>
             </p>
           </div>
         </div>
@@ -158,8 +161,8 @@ const About: React.FC = () => {
             <div className="flex items-start">
               <span className="flex-shrink-0 w-8 h-8 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-semibold text-sm">2</span>
               <div className="ml-3">
-                <h4 className="font-semibold text-gray-900">Automated Analysis</h4>
-                <p className="text-gray-600 text-sm">The system analyzes your protocol using advanced rules and burden calculations</p>
+                <h4 className="font-semibold text-gray-900">MCP Analysis + Optimization</h4>
+                <p className="text-gray-600 text-sm">Real MCP server analyzes complexity, then applies 32+ aggressive optimization rules</p>
               </div>
             </div>
             

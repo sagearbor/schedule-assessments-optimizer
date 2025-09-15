@@ -1,65 +1,76 @@
 graph TB
     subgraph "User Interface Layer"
-        A[User] -->|Upload Excel/CSV| B[Frontend React App]
+        A[User] -->|Upload CSV/JSON| B[Frontend React App<br/>Port 3040]
         B -->|Parse File| C[File Parser]
         C -->|Extract Schedule Data| D[Schedule Validator]
     end
-    
+
     subgraph "API Gateway"
-        D -->|POST Request| E[FastAPI Backend]
+        D -->|POST Request| E[FastAPI Backend<br/>Port 8040]
         E -->|JWT Auth| F[Authentication Service]
         F -->|Validate Token| G[User Session]
     end
-    
+
     subgraph "Core Processing Engine"
-        E -->|Schedule Object| H[Rules Engine]
-        
-        H -->|Rule 1| I[Redundancy Detection]
-        I -->|Find Duplicates| J[Assessment Comparator]
-        
-        H -->|Rule 2| K[Visit Consolidation]
-        K -->|Analyze Proximity| L[Timeline Analyzer]
-        
+        E -->|Schedule Object| H[Rules Engine<br/>32+ Suggestions]
+
+        H -->|Rule 1| I[Redundancy Detection<br/>21-day window]
+        I -->|Find Duplicates| J[Assessment Eliminator]
+
+        H -->|Rule 2| K[Visit Consolidation<br/>14-day window]
+        K -->|Merge Visits| L[Timeline Optimizer]
+
         H -->|Rule 3| M[Feasibility Check]
-        M -->|Query Knowledge| N[MCP Services]
+        M -->|Request Analysis| MCP[Real MCP Server]
     end
-    
-    subgraph "MCP Integration Layer"
-        N -->|HTTP Request| O[Protocol Complexity Analyzer]
-        N -->|HTTP Request| P[Compliance Knowledge Base]
-        O -->|Complexity Score| M
-        P -->|Compliance Data| M
+
+    subgraph "Real MCP Integration - EXTERNAL"
+        MCP -->|JSON-RPC 2.0| MCPServ[MCP Server<br/>Port 8210]
+        MCPServ -->|Tool: schedule_converter| Conv[Schedule Converter<br/>CSV→CDISC/FHIR/OMOP]
+        MCPServ -->|Tool: study_complexity| Complex[Complexity Calculator]
+        MCPServ -->|Tool: compliance_checker| Comply[Compliance Checker]
+
+        Conv -->|Pattern Matching 80%| Pattern[Regex Engine]
+        Conv -->|LLM Validation| LLM1[Azure OpenAI<br/>First Pass]
+        Pattern -->|Disagreement >20%| Judge[LLM Arbitrator<br/>GPT-5 mini]
+        LLM1 -->|Disagreement| Judge
+        Judge -->|Final Decision| Conv
+
+        Complex -->|Complexity Score| M
+        Comply -->|Warnings| M
     end
-    
+
     subgraph "Burden Calculation"
-        H -->|Assessment Data| Q[Burden Calculator]
-        Q -->|Patient Metrics| R[Patient Burden Score]
+        H -->|Assessment Data| Q[Burden Calculator<br/>Sensitive Scoring]
+        Q -->|Patient Metrics| R[Patient Burden<br/>30hr/15visit max]
         Q -->|Site Metrics| S[Site Burden Score]
         R -->|Time, Travel, Invasiveness| T[Weighted Score]
         S -->|Staff, Equipment, Cost| U[Resource Score]
     end
-    
+
     subgraph "Data Persistence"
         E -->|Store Schedule| V[SQLite Database]
         V -->|User Data| W[User Table]
         V -->|Optimization History| X[History Table]
         V -->|Schedule Data| Y[Schedule Table]
     end
-    
+
     subgraph "Results Processing"
         T -->|Aggregate| Z[Optimization Result]
         U -->|Aggregate| Z
-        J -->|Recommendations| Z
-        L -->|Suggestions| Z
-        M -->|Warnings| Z
+        J -->|Eliminations<br/>Baseline 4→0| Z
+        L -->|Consolidations<br/>Day3+Day5| Z
+        M -->|MCP Analysis| Z
         Z -->|JSON Response| E
         E -->|Return to Frontend| B
-        B -->|Render Visualization| AA[Results Dashboard]
-        AA -->|Display to User| A
+        B -->|Render Bar Charts| AA[Results Dashboard<br/>Visual Comparison]
+        AA -->|Display Changes| A
     end
-    
+
     style A fill:#e1f5fe,stroke:#01579b,stroke-width:3px
     style E fill:#f3e5f5,stroke:#4a148c,stroke-width:3px
     style H fill:#e8f5e9,stroke:#1b5e20,stroke-width:3px
     style Q fill:#fce4ec,stroke:#880e4f,stroke-width:3px
     style Z fill:#fff9c4,stroke:#f57f17,stroke-width:3px
+    style MCPServ fill:#ffebee,stroke:#c62828,stroke-width:4px
+    style Judge fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
