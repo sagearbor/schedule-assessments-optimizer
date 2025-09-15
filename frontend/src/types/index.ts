@@ -65,6 +65,7 @@ export interface OptimizationSuggestion {
   visits_affected: string[];
   estimated_burden_reduction: number;
   implementation_difficulty: string;
+  consensus_method?: string;
 }
 
 export interface ComplianceWarning {

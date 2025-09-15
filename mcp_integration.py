@@ -21,7 +21,7 @@ class MCPScheduleConverter:
         """Initialize connection to the MCP server in the adjacent repository"""
         # Path to the MCP server in the dcri-mcp-tools repo
         self.mcp_tools_path = Path("/dcri/sasusers/home/scb2/gitRepos/dcri-mcp-tools")
-        self.server_script = self.mcp_tools_path / "schedule_converter_mcp.py"
+        self.server_script = self.mcp_tools_path / "scripts" / "schedule_converter_mcp.py"
 
         if not self.server_script.exists():
             raise FileNotFoundError(f"MCP server not found at {self.server_script}")

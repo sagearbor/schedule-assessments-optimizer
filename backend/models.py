@@ -133,6 +133,7 @@ class OptimizationSuggestion(BaseModel):
     visits_affected: List[str]
     estimated_burden_reduction: float
     implementation_difficulty: str  # Easy, Moderate, Hard
+    consensus_method: Optional[str] = None  # Which method suggested this
 
 
 class ComplianceWarning(BaseModel):
