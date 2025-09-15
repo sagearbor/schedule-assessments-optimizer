@@ -59,9 +59,12 @@ class RulesEngine:
         if suggestions:
             print(f"Top suggestions: {[s.description for s in suggestions[:5]]}")
 
+        # Sort suggestions by impact and apply more of them
+        suggestions.sort(key=lambda x: x.estimated_burden_reduction, reverse=True)
+
         optimized_schedule = self._apply_suggestions(
             optimized_schedule,
-            suggestions[:5]  # Apply top 5 suggestions
+            suggestions[:20]  # Apply top 20 suggestions for more impact
         )
 
         # Debug: Check if changes were made
@@ -373,30 +376,30 @@ class RulesEngine:
                         desc_lower = suggestion.description.lower()
 
                         if "redundant" in desc_lower:
-                            # Extract assessment name from description
-                            # Format: "Remove redundant {assessment_name} on Day X"
-                            if "blood" in desc_lower or "safety" in desc_lower:
-                                # Remove duplicate blood draws, keep only one
-                                blood_draws = [a for a in visit.assessments if a.type == AssessmentType.BLOOD_DRAW]
-                                if len(blood_draws) > 1:
-                                    # Keep first blood draw, remove others
-                                    visit.assessments = [a for a in visit.assessments if a.type != AssessmentType.BLOOD_DRAW]
-                                    visit.assessments.append(blood_draws[0])
-                            elif "ecg" in desc_lower:
-                                # Remove duplicate ECGs
-                                ecgs = [a for a in visit.assessments if a.type == AssessmentType.ECG]
-                                if len(ecgs) > 1:
-                                    visit.assessments = [a for a in visit.assessments if a.type != AssessmentType.ECG]
-                                    visit.assessments.append(ecgs[0])
+                            # Extract specific assessment type to remove
+                            if "vital signs" in desc_lower:
+                                # Remove vital signs if redundant
+                                visit.assessments = [a for a in visit.assessments if a.type != AssessmentType.VITAL_SIGNS]
+                            elif "blood" in desc_lower or "safety labs" in desc_lower:
+                                # Remove blood draw if redundant
+                                visit.assessments = [a for a in visit.assessments if a.type != AssessmentType.BLOOD_DRAW]
+                            elif "ecg" in desc_lower or "12-lead" in desc_lower:
+                                # Remove ECG if redundant
+                                visit.assessments = [a for a in visit.assessments if a.type != AssessmentType.ECG]
+                            elif "ct scan" in desc_lower:
+                                # Remove CT scan if redundant
+                                ct_assessments = [a for a in visit.assessments if "ct" in a.name.lower()]
+                                if ct_assessments:
+                                    visit.assessments = [a for a in visit.assessments if a not in ct_assessments]
+                            elif "urinalysis" in desc_lower:
+                                # Remove urinalysis if redundant
+                                visit.assessments = [a for a in visit.assessments if a.type != AssessmentType.URINALYSIS]
                             else:
-                                # Generic redundancy - remove duplicates by name
-                                seen_names = set()
-                                new_assessments = []
-                                for a in visit.assessments:
-                                    if a.name not in seen_names:
-                                        new_assessments.append(a)
-                                        seen_names.add(a.name)
-                                visit.assessments = new_assessments
+                                # Try to match assessment by name in description
+                                for a in visit.assessments[:]:  # Copy list to iterate safely
+                                    if a.name.lower() in desc_lower:
+                                        visit.assessments.remove(a)
+                                        break
 
                         elif "streamline safety" in desc_lower:
                             # Keep essential safety assessments, remove redundant ones

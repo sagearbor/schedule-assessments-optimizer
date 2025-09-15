@@ -583,72 +583,143 @@ class SampleDataGenerator:
             return self.generate_oncology_phase2_schedule()
     
     def generate_complex_schedule_with_issues(self) -> Schedule:
-        """Generate a schedule with deliberate optimization opportunities."""
+        """Generate a schedule with many deliberate optimization opportunities."""
         visits = []
-        
-        # Overly frequent early visits
-        for week in range(1, 5):
-            assessments = [
+
+        # Screening visit
+        visits.append(Visit(
+            id=str(uuid.uuid4()),
+            name="Screening",
+            day=-14,
+            window_days_before=3,
+            window_days_after=3,
+            assessments=[
                 self.assessment_templates["vital_signs"],
                 self.assessment_templates["blood_draw_safety"],
-                self.assessment_templates["ecg"] if week % 2 == 0 else self.assessment_templates["urinalysis"]
+                self.assessment_templates["ecg"],
+                self.assessment_templates["physical_exam"],
+                self.assessment_templates["ct_scan"]
             ]
+        ))
+
+        # Baseline - duplicates screening unnecessarily
+        visits.append(Visit(
+            id=str(uuid.uuid4()),
+            name="Baseline",
+            day=0,
+            assessments=[
+                self.assessment_templates["vital_signs"],
+                self.assessment_templates["blood_draw_safety"],
+                self.assessment_templates["ecg"],  # Redundant - just done at screening
+                self.assessment_templates["ct_scan"]  # Redundant - just done at screening
+            ]
+        ))
+
+        # PROBLEM 1: Back-to-back visits that could be combined
+        visits.append(Visit(
+            id=str(uuid.uuid4()),
+            name="Day 3 Safety",
+            day=3,
+            assessments=[
+                self.assessment_templates["vital_signs"],
+                self.assessment_templates["blood_draw_safety"]
+            ]
+        ))
+
+        visits.append(Visit(
+            id=str(uuid.uuid4()),
+            name="Day 5 PK",
+            day=5,
+            assessments=[
+                self.assessment_templates["vital_signs"],  # Duplicate from Day 3
+                self.assessment_templates["blood_draw_pk"]
+            ]
+        ))
+
+        # PROBLEM 2: Weekly visits with identical assessments
+        for week in [1, 2, 3, 4]:
             visits.append(Visit(
                 id=str(uuid.uuid4()),
                 name=f"Week {week}",
                 day=week * 7,
                 window_days_before=1,  # Too restrictive
-                window_days_after=1,
-                assessments=assessments
+                window_days_after=1,   # Too restrictive
+                assessments=[
+                    self.assessment_templates["vital_signs"],
+                    self.assessment_templates["blood_draw_safety"],
+                    self.assessment_templates["ecg"],  # ECG every week is excessive
+                    self.assessment_templates["urinalysis"]  # Urinalysis every week is excessive
+                ]
             ))
-        
-        # Back-to-back intensive procedures
-        intensive_assessments = [
-            self.assessment_templates["ct_scan"],
-            self.assessment_templates["tumor_biopsy"],
-            self.assessment_templates["blood_draw_safety"],
-            self.assessment_templates["physical_exam"]
-        ]
+
+        # PROBLEM 3: Multiple imaging studies too close together
         visits.append(Visit(
             id=str(uuid.uuid4()),
-            name="Week 5 Intensive",
+            name="Week 5 Imaging",
             day=35,
-            assessments=intensive_assessments
-        ))
-        
-        # Another intensive visit too soon
-        visits.append(Visit(
-            id=str(uuid.uuid4()),
-            name="Week 6 Intensive",
-            day=42,
             assessments=[
-                self.assessment_templates["mri_scan"],
+                self.assessment_templates["ct_scan"],
+                self.assessment_templates["mri_scan"],  # Both CT and MRI same day
                 self.assessment_templates["tumor_biopsy"],
                 self.assessment_templates["blood_draw_safety"]
             ]
         ))
-        
-        # Redundant safety monitoring
-        for week in range(8, 13):
+
+        # PROBLEM 4: Another imaging visit too soon after Week 5
+        visits.append(Visit(
+            id=str(uuid.uuid4()),
+            name="Week 6 Follow-up",
+            day=42,
+            assessments=[
+                self.assessment_templates["ct_scan"],  # CT again after just 1 week
+                self.assessment_templates["blood_draw_safety"],
+                self.assessment_templates["vital_signs"]
+            ]
+        ))
+
+        # PROBLEM 5: Excessive safety monitoring with redundant tests
+        for week in range(8, 16):  # 8 consecutive weeks of identical visits
+            assessments_list = [
+                self.assessment_templates["vital_signs"],
+                self.assessment_templates["blood_draw_safety"]
+            ]
+            if week % 2 == 0:  # ECG every other week
+                assessments_list.append(self.assessment_templates["ecg"])
+            if week % 3 == 0:  # Urinalysis every 3rd week
+                assessments_list.append(self.assessment_templates["urinalysis"])
+
             visits.append(Visit(
                 id=str(uuid.uuid4()),
                 name=f"Week {week} Safety",
                 day=week * 7,
-                assessments=[
-                    self.assessment_templates["vital_signs"],
-                    self.assessment_templates["blood_draw_safety"],
-                    self.assessment_templates["ecg"],
-                    self.assessment_templates["urinalysis"]
-                ]
+                assessments=assessments_list
             ))
-        
+
+        # PROBLEM 6: End of study with unnecessary repeat of all tests
+        visits.append(Visit(
+            id=str(uuid.uuid4()),
+            name="End of Study",
+            day=120,
+            assessments=[
+                self.assessment_templates["vital_signs"],
+                self.assessment_templates["blood_draw_safety"],
+                self.assessment_templates["ecg"],
+                self.assessment_templates["ct_scan"],
+                self.assessment_templates["mri_scan"],  # Both imaging again
+                self.assessment_templates["physical_exam"],
+                self.assessment_templates["questionnaire_qol"],
+                self.assessment_templates["urinalysis"],
+                self.assessment_templates["cognitive_test"]  # Excessive assessments
+            ]
+        ))
+
         return Schedule(
             id=str(uuid.uuid4()),
-            protocol_name="TEST-2024-001: Unoptimized Protocol for Testing",
+            protocol_name="COMPLEX-UNOPT-2024: Protocol with Many Optimization Opportunities",
             protocol_version="1.0",
             therapeutic_area="Oncology",
             phase="2",
             visits=visits,
-            total_duration_days=90,
+            total_duration_days=120,
             created_at=datetime.utcnow()
         )
